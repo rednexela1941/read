@@ -15,45 +15,77 @@ def flatten(data):
             out.append(j)
     return out
 
-def scrape():
-    books = []
-    for k in range(1,21):
-        link = URL + f"?page={k}"
-        books.append(parse(link))
-    return flatten(books)
+# def scrape():
+#     books = []
+#     for k in range(1,21):
+#         link = URL + f"?page={k}"
+#         books.append(parse(link))
+#     return flatten(books)
 
 def string_html(element):
     el = etree.tostring(element, pretty_print=True)
     return el
 # https://thegreatestbooks.org/?page=4
 
+def extract_isbn(amazon_link):
+    z = re.search("dp\/([\d]+)", amazon_link)
+    z = z.groups()[0]
+    return z
 
-def parse(url):
-    page = req.get(url)
-    tree = html.fromstring(page.content)
+
+def parse():
     books = []
-    containers = tree.find_class("item pb-3 pt-3 border-bottom")
-    for k in containers:
-        # print(etree.tostring(k, pretty_print=True))
-        element = k.find_class('col')[0].cssselect('h4')[0]
-        amazon = k.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
-        amazon_link = amazon[1].get("href")
-        print(amazon_link)
-        # try:
-        length = get_length(amazon_link)
-        # except:
-        print("couldn't get amazon link")
-        length = 0
-        info = element.text_content()
-        split = info.split('.')
-        number = int(split[0])
-        info = element.cssselect('a')
-        title = info[0].text_content()
-        author = info[1].text_content()
-        book = {"title": title, "author": author, "rank": number, "length": length}
-        books.append(book)
-        print(number)
-    return books
+    header = ['rank', 'title', 'author','length']
+    with open('books.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        for k in range(1,7):
+            link = URL + f"?page={k}"
+            print(link)
+            next
+            page = req.get(link)
+            tree = html.fromstring(page.content)
+            containers = tree.find_class("item pb-3 pt-3 border-bottom")
+            for c in containers:
+                # print(etree.tostring(k, pretty_print=True))
+                element = c.find_class('col')[0].cssselect('h4')[0]
+                # print(amazon_link)
+                # print(extract_isbn(amazon_link))
+                # try:
+                try:
+                    amazon = c.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
+                    amazon_link = amazon[1].get("href")
+                    amazon_isbn = extract_isbn(amazon_link)
+                    length = get_rlength(amazon_isbn)
+                except:
+                    print("couldn't get length")
+                    length = 0
+                    # break
+                # length = get_length(amazon_link)
+                # except:
+                # print("couldn't get amazon link")
+                info = element.text_content()
+                split = info.split('.')
+                number = int(split[0])
+                info = element.cssselect('a')
+                title = info[0].text_content()
+                author = info[1].text_content()
+                book = {"title": title, "author": author, "rank": number, "length": length}
+                writer.writerow(get_row(book, header))
+                print(number, book)
+
+def get_rlength(isbn):
+    link = f"https://www.readinglength.com/book/isbn-{isbn}/"
+    page = req.get(link)
+    tree = html.fromstring(page.content)
+    text = tree.text_content()
+    z = re.search("Pages([\d]+)", text)
+    # print(z.groups()[0])
+    return int(z.groups()[0])
+
+
+
+
 
 def get_length(amazon_link):
     page = req.get(amazon_link)
@@ -117,7 +149,8 @@ def output_csv(books):
 # prices = tree.xpath('//span[@class="item-price"]/text()')
 if __name__ == "__main__":
 
-    books = scrape()
+    parse()
+    # books = scrape()
 
-    print(books)
+    # print(books)
     # output_csv(books)
