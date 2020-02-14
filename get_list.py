@@ -36,9 +36,12 @@ def parse(url):
     for k in containers:
         # print(etree.tostring(k, pretty_print=True))
         element = k.find_class('col')[0].cssselect('h4')[0]
-        amazon = k.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
-        amazon_link = amazon[1].get("href")
-        length = get_length(amazon_link)
+        try:
+            amazon = k.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
+            amazon_link = amazon[1].get("href")
+            length = get_length(amazon_link)
+        except:
+            length = 0
         info = element.text_content()
         split = info.split('.')
         number = int(split[0])
