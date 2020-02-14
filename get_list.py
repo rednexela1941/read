@@ -39,7 +39,7 @@ def parse():
     with open('books.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
-        for k in range(1,7):
+        for k in range(1,2):
             link = URL + f"?page={k}"
             print(link)
             next
@@ -79,8 +79,11 @@ def get_rlength(isbn):
     page = req.get(link)
     tree = html.fromstring(page.content)
     text = tree.text_content()
+    print(text)
     z = re.search("Pages([\d]+)", text)
-    # print(z.groups()[0])
+    # k = re.search("\"wordCount\":([\d]+)",text)
+
+    # print(k.groups())# print(z.groups()[0])
     return int(z.groups()[0])
 
 
