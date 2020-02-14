@@ -36,12 +36,14 @@ def parse(url):
     for k in containers:
         # print(etree.tostring(k, pretty_print=True))
         element = k.find_class('col')[0].cssselect('h4')[0]
-        try:
-            amazon = k.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
-            amazon_link = amazon[1].get("href")
-            length = get_length(amazon_link)
-        except:
-            length = 0
+        amazon = k.find_class('pb-3')[0].find_class('pull-left mr-3')[0].cssselect('a')
+        amazon_link = amazon[1].get("href")
+        print(amazon_link)
+        # try:
+        length = get_length(amazon_link)
+        # except:
+        print("couldn't get amazon link")
+        length = 0
         info = element.text_content()
         split = info.split('.')
         number = int(split[0])
@@ -54,17 +56,27 @@ def parse(url):
     return books
 
 def get_length(amazon_link):
-    try:
-        page = req.get(amazon_link)
-        tree = html.fromstring(page.content)
-        containers = tree.find_class("content")
+    page = req.get(amazon_link)
+    tree = html.fromstring(page.content)
+    print(tree, "tree")
+    print(tree.text_content())
+    containers = tree.find_class("content")
     # print("area",  containers)
-        element = containers[0].cssselect('li')[0].text_content()
-        z = re.search("([\d]+)", element)
-        z = int(z.group(0)) if z!= None else 0
-        return z
-    except:
-        return 0
+    print(containers)
+    element = containers[0].cssselect('li')
+    for e in element:
+        print(e.text_content())
+    return 0
+
+
+        # print("amazon word count here", element)
+        # z = re.search("([\d]+)", element)
+        # z = int(z.group(0)) if z!= None else 0
+        # return z
+    #     return 0
+    # except:
+    #     print("no word count")
+    #     return 0
 
 
     # for k in containers:
@@ -108,4 +120,4 @@ if __name__ == "__main__":
     books = scrape()
 
     print(books)
-    output_csv(books)
+    # output_csv(books)
